@@ -494,16 +494,39 @@ void EmulsionDet::GetLocalPosition(Int_t id, const Double_t* globalpos, Double_t
 	//returning position to local
 	nav->MasterToLocal(globalpos, centerpos);
 
-        TGeoBBox *emubox = (TGeoBBox*) gGeoManager->GetVolume("Emulsion")->GetShape();
+    TGeoBBox *emubox = (TGeoBBox*) gGeoManager->GetVolume("Emulsion")->GetShape();
 
 	Double_t EmulsionDX = emubox->GetDX();
 	Double_t EmulsionDY = emubox->GetDY();	
 
 	localpos[0] = (centerpos[0] + EmulsionDX)*1e+4;
 	localpos[1] = (centerpos[1] + EmulsionDY)*1e+4;
-	localpos[2] = centerpos[2]*1e+4;
+	localpos[2] = centerpos[2]*1e+4; //from sndsw cm to emulsion micron and from center to corner (our scanning takes 0,0 in a corner)
+}
 
-	//from sndsw cm to emulsion micron and from center to corner (our scanning takes 0,0 in a corner)
+void EmulsionDet::GetLocalPositionBrick(Int_t id, const Double_t* globalpos, Double_t* localpos){
+	Double_t centerpos[3];
+	//get full path
+	TString pathtoplate = PathBrickID(id);
+	TGeoNavigator* nav = gGeoManager->GetCurrentNavigator();
+	//going to Brick reference system (not EMU)
+	int pos = pathtoplate.Last('/');  // find last '/'
+	TString pathtobrick = pathtoplate(0, pos + 1);       // keep everything up to that '/'
+	nav->cd(pathtobrick.Data());
+
+	//returning position to local
+	nav->MasterToLocal(globalpos, centerpos);
+
+    TGeoBBox *brickbox = (TGeoBBox*) gGeoManager->GetVolume("Brick")->GetShape();
+
+	Double_t BrickDX = brickbox->GetDX();
+	Double_t BrickDY = brickbox->GetDY();
+	Double_t BrickDZ = brickbox->GetDZ();	
+
+	localpos[0] = (centerpos[0] + BrickDX)*1e+4 - 500; // to corner of emulsion volume
+	localpos[1] = (centerpos[1] + BrickDY)*1e+4 - 500; 
+	localpos[2] = (centerpos[2] - BrickDZ)*1e+4 + 157.5; // to center of last emulsion
+
 }
 
 void EmulsionDet::GetLocalAngles(Int_t id, const Double_t* globalang, Double_t* localang){

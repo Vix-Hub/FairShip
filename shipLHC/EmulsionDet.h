@@ -78,6 +78,7 @@ public:
     void GetAngles(Int_t id, const Double_t* localang, Double_t* globalang);//converting angles
 
     void GetLocalPosition(Int_t id, const Double_t* globalpos, Double_t* localpos); // use mastertolocal to convert positions
+    void GetLocalPositionBrick(Int_t id, const Double_t* globalpos, Double_t* localpos);
     void GetLocalAngles(Int_t id, const Double_t* globalang, Double_t* localang);//converting angles
     
     ClassDef(EmulsionDet,5)
